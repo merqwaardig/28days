@@ -496,15 +496,9 @@
     ];
 
     function renderMonthCalendar() {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = now.getMonth();
-      const today = now.getDate();
-      const monthName = now.toLocaleString('default', { month: 'long', year: 'numeric' });
-
-      // Get first day of month and number of days
-      const firstDay = new Date(year, month, 1).getDay();
-      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      // 28-day calendar (4 weeks × 7 days)
+      const daysInMonth = 28;
+      const monthName = '28-Day Moon Cycle';
 
       // Set header
       document.getElementById('calendarHeader').textContent = monthName;
@@ -513,24 +507,23 @@
       const grid = document.getElementById('calendarGrid');
       grid.innerHTML = '';
 
-      // Add empty cells before first day
-      for (let i = 0; i < firstDay; i++) {
-        const emptyCell = document.createElement('div');
-        emptyCell.className = 'calendar-day empty';
-        grid.appendChild(emptyCell);
-      }
+      // Determine today in the 28-day cycle
+      const now = new Date();
+      const dayOfMonth = now.getDate();
+      // Map Gregorian day to 28-day cycle (simplified: use day mod 28)
+      const today28 = ((dayOfMonth - 1) % 28) + 1;
 
-      // Add day cells
+      // Add day cells for 28-day calendar
       for (let day = 1; day <= daysInMonth; day++) {
         const dayCell = document.createElement('div');
         dayCell.className = 'calendar-day';
 
-        // Calculate which day of week this is (0=Sunday, 6=Saturday)
-        const dayOfWeek = (firstDay + day - 1) % 7;
-        const chakraColor = chakraColorMap[dayOfWeek];
+        // Calculate which chakra this day belongs to (0-6 in 7-day cycle)
+        const chakraIndex = (day - 1) % 7;
+        const chakraColor = chakraColorMap[chakraIndex];
 
         // Check if this is today
-        const isToday = day === today;
+        const isToday = day === today28;
 
         if (isToday) {
           // Today: full chakra color background
@@ -556,15 +549,6 @@
         }
 
         grid.appendChild(dayCell);
-      }
-
-      // Add empty cells after last day of month to complete the grid
-      const totalCells = firstDay + daysInMonth;
-      const remainingCells = (7 - (totalCells % 7)) % 7;
-      for (let i = 0; i < remainingCells; i++) {
-        const emptyCell = document.createElement('div');
-        emptyCell.className = 'calendar-day empty';
-        grid.appendChild(emptyCell);
       }
     }
 
