@@ -526,18 +526,15 @@
         const dayOfWeek = (firstDay + day - 1) % 7;
         const chakraColor = chakraColorMap[dayOfWeek];
 
+        // Set background to chakra color
+        dayCell.style.backgroundColor = chakraColor;
+
         // Create day number
         const dayNumber = document.createElement('span');
         dayNumber.className = 'day-number';
         dayNumber.textContent = day;
 
-        // Create chakra dot
-        const dot = document.createElement('div');
-        dot.className = 'chakra-dot';
-        dot.style.backgroundColor = chakraColor;
-
         dayCell.appendChild(dayNumber);
-        dayCell.appendChild(dot);
         grid.appendChild(dayCell);
       }
     }
