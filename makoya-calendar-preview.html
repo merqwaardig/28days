@@ -24,7 +24,7 @@
       background-attachment: fixed;
       z-index: -1;
       width: 100vw;
-      height: 100dvh;
+      height: calc(var(--vh, 1vh) * 100);
     }
     .container { max-width: 900px; margin: 0 auto; }
     .controls { margin-bottom: 20px; text-align: center; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
@@ -330,6 +330,15 @@
     });
 
     render();
+
+    function setBackgroundHeight() {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', vh + 'px');
+    }
+
+    setBackgroundHeight();
+    window.addEventListener('resize', setBackgroundHeight);
+    window.addEventListener('orientationchange', setBackgroundHeight);
   </script>
 </body>
 </html>
