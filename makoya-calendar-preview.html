@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MAKOYA Calendar</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; width: 100%; }
+    body { 
+      font-family: 'Courier New', monospace; 
+      background: linear-gradient(135deg, #0a0e27 0%, #1a1a3f 50%, #0d0a20 100%);
+      padding: 20px; 
+      min-height: 100vh;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    .controls { margin-bottom: 20px; text-align: center; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+    .day-btn { 
+      padding: 6px 12px; border: 1px solid #ccc; background: #fff; cursor: pointer; 
+      font-family: 'Courier New', monospace; font-size: 12px; border-radius: 4px; 
+      transition: all 0.2s; flex: 0 0 auto; color: #000;
+    }
+    .day-btn:hover { background: #f0f0f0; }
+    .day-btn.active { 
+      background: var(--day-color);
+      color: #fff; 
+      border-color: var(--day-color); 
+      font-weight: 600;
+    }
+
+    .card-wrapper {
+      perspective: 1200px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: height 0.6s ease;
+    }
+
+    .card-wrapper.front {
+      height: 200px;
+    }
+
+    .card-wrapper.back {
+      height: 560px;
+    }
+
+    .card {
+      width: 100%; height: 100%;
+      border-radius: 16px;
+      padding: 28px;
+      color: #fff;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      position: relative;
+      transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      transform-style: preserve-3d;
+    }
+
+    .card.flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card-front, .card-back {
+      backface-visibility: hidden;
+      width: 100%;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      padding: 28px;
+      overflow: hidden;
+    }
+
+    .card-front {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .card-text {
+      flex: 1;
+      font-size: 18px;
+      line-height: 1.6;
+    }
+    .card-text .title-line {
+      font-size: 21px;
+      font-weight: 600;
+    }
+    .card-text .chakra-line {
+      display: block;
+      margin-top: -10px;
+      font-weight: 600;
+    }
+
+    .card-icon-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .card-icon {
+      width: 72px;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,0.2));
+    }
+
+    .card-icon svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .arrow { font-size: 24px; opacity: 0.7; }
+
+    .back-content { font-size: 16px; line-height: 1.6; }
+    .back-header { margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.2); }
+    .back-title { font-size: 25px; margin-bottom: 0px; font-weight: 700; line-height: 1.1; }
+    .back-subtitle { font-size: 17px; color: rgba(255,255,255,0.75); margin-top: -2px; }
+
+    .essence, .aspects, .insights { margin-bottom: 10px; font-size: 16px; }
+    .insights { margin-bottom: 24px; }
+    
+    .balance-section {
+      display: grid;
+      grid-template-columns: 1fr 1px 1fr;
+      gap: 16px;
+      margin-bottom: 10px;
+    }
+    
+    .section-col { }
+    .section-title { font-size: 20px; text-transform: uppercase; margin-bottom: 10px; font-weight: 700; letter-spacing: 0.5px; }
+    .section-label { font-size: 15px; margin-top: 6px; margin-bottom: 3px; font-weight: 700; color: #fff; }
+    .section-label:first-child { margin-top: 0; }
+    .section-item { font-size: 15px; margin-left: 10px; line-height: 18px; color: rgba(255,255,255,0.85); }
+    .divider { background: rgba(255,255,255,0.15); }
+
+    @media (max-width: 768px) {
+      body { padding: 14px; }
+      .card-wrapper.front { height: 170px; }
+      .card-wrapper.back { height: 540px; }
+      .card { padding: 20px; gap: 12px; }
+      .card-back { padding: 20px; }
+      .card-text { font-size: 16px; line-height: 1.5; }
+      .card-icon { width: 56px; height: 56px; }
+      .arrow { font-size: 18px; }
+      .back-content { font-size: 14px; }
+      .back-title { font-size: 21px; }
+      .back-subtitle { font-size: 16px; }
+      .section-item { font-size: 14px; }
+      .section-label { font-size: 14px; }
+      .section-title { font-size: 14px; }
+      .essence, .aspects, .insights { font-size: 14px; }
+    }
+
+    @media (max-width: 480px) {
+      .card-wrapper.front { height: 150px; }
+      .card-wrapper.back { height: 520px; }
+      .card { padding: 16px; gap: 8px; }
+      .card-back { padding: 16px; }
+      .card-text { font-size: 14px; }
+      .card-icon { width: 48px; height: 48px; }
+      .arrow { font-size: 16px; }
+      .controls { margin-bottom: 14px; }
+      .day-btn { padding: 5px 10px; font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="controls" id="dayButtons"></div>
+    
+    <div class="card-wrapper" id="cardWrapper">
+      <div class="card" id="card">
+        <div class="card-front" id="cardFront">
+          <div class="card-text" id="frontText"></div>
+          <div class="card-icon-wrapper">
+            <div class="card-icon" id="cardIcon"></div>
+            <div class="arrow">›</div>
+          </div>
+        </div>
+        <div class="card-back" id="cardBack">
+          <div class="back-content" id="backContent"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const svgs = {
+      1: '<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> <title>1e - rond</title> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="iconen-copy" fill-rule="nonzero"> <g id="1e---rond"> <circle id="Root-Copy-6" fill="#BD151B" cx="24" cy="24" r="24"></circle> <g id="1e-copy" transform="translate(10.4348, 10.4348)" stroke="#FFFFFF" stroke-width="2"> <rect id="1e-chakra-modern" x="1" y="1" width="25.1304348" height="25.1304348"></rect> </g> </g> </g> </g> </svg>',
+      2: '<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> <title>2e chakra</title> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="iconen-copy" transform="translate(-62, 0)"> <g id="2e-chakra" transform="translate(62, 0)"> <circle id="Root-Copy-5" fill="#F35822" fill-rule="nonzero" cx="24" cy="24" r="24"></circle> <g id="2e-copy" stroke-width="1" fill-rule="evenodd" transform="translate(5.2174, 5.2174)" stroke="#FFFFFF"> <circle id="Oval-Copy" fill-rule="nonzero" cx="18.7826087" cy="18.7826087" r="18.7826087"></circle> <ellipse id="Oval-Copy-2" fill-rule="nonzero" cx="18.7826087" cy="15.6521739" rx="17.7391304" ry="15.6521739"></ellipse> </g> </g> </g> </g> </svg>',
+      3: '<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> <title>3e - rond</title> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="iconen-copy" transform="translate(-125, 0)"> <g id="3e---rond" transform="translate(125, 0)"> <circle id="Root-Copy-4" fill="#F3B512" fill-rule="nonzero" cx="24" cy="24" r="24"></circle> <g id="Group" transform="translate(6.2609, 6.3258)" fill="#FFFFFF" stroke="#FFFFFF"> <path d="M17.7391304,28.1518558 C11.9657841,28.1518558 7.27629505,23.4646872 7.27629505,17.7030753 C7.27629505,11.9414634 11.9730098,7.2542948 17.7391304,7.2542948 C23.5124768,7.2542948 28.2091915,11.9414634 28.2091915,17.7030753 C28.2091915,23.4646872 23.505251,28.1518558 17.7391304,28.1518558 Z M17.7391304,8.12682927 C12.4426813,8.12682927 8.14338086,12.4246023 8.14338086,17.7102863 C8.14338086,22.9959703 12.449907,27.2937434 17.7391304,27.2937434 C23.0355796,27.2937434 27.3421057,22.9959703 27.3421057,17.7102863 C27.3421057,12.4246023 23.0283538,8.12682927 17.7391304,8.12682927 Z" id="Shape" fill-rule="nonzero"></path> <path d="M17.6379704,4.56458112 C17.3995218,4.56458112 17.2044275,4.36988335 17.2044275,4.13191941 L17.2044275,0.432661718 C17.2044275,0.194697773 17.3995218,0 17.6379704,0 C17.876419,0 18.0715133,0.194697773 18.0715133,0.432661718 L18.0715133,4.13191941 C18.0715133,4.36988335 17.8836447,4.56458112 17.6379704,4.56458112 Z" id="Path"></path> <path d="M24.4518197,6.33849417 C24.3795626,6.33849417 24.3073054,6.31686108 24.2350483,6.28080594 C24.0255025,6.15821845 23.9532454,5.89862142 24.0760825,5.68950159 L25.9258656,2.48780488 C26.0487027,2.27868505 26.3088285,2.20657476 26.5183742,2.32916225 C26.72792,2.45174973 26.8001771,2.71134677 26.6773399,2.9204666 L24.8275569,6.12216331 C24.748074,6.25917285 24.6035597,6.33849417 24.4518197,6.33849417 Z" id="Path"></path> <path d="M29.466466,11.2708378 C29.3147259,11.2708378 29.1702116,11.1915164 29.0907288,11.0545069 C28.9678916,10.8453871 29.0401488,10.58579 29.2496945,10.4632025 L32.457912,8.61717922 C32.6674577,8.49459173 32.9275835,8.56670201 33.0504206,8.77582185 C33.1732578,8.98494168 33.1010006,9.24453871 32.8914549,9.36712619 L29.6832374,11.2131495 C29.618206,11.2492047 29.5459488,11.2708378 29.466466,11.2708378 Z" id="Path"></path> <path d="M35.044718,18.0492047 L31.3379261,18.0492047 C31.0994776,18.0492047 30.9043832,17.8545069 30.9043832,17.6165429 C30.9043832,17.378579 31.0994776,17.1838812 31.3379261,17.1838812 L35.044718,17.1838812 C35.2831666,17.1838812 35.4782609,17.378579 35.4782609,17.6165429 C35.4782609,17.8545069 35.2831666,18.0492047 35.044718,18.0492047 Z" id="Path"></path> <path d="M32.7686177,26.695228 C32.6963606,26.695228 32.6168777,26.6735949 32.5518463,26.6375398 L29.3436288,24.7843054 C29.1340831,24.6617179 29.0618259,24.4021209 29.1846631,24.1930011 C29.3075002,23.9838812 29.567626,23.9117709 29.7771717,24.0343584 L32.9853892,25.8875928 C33.1949349,26.0101803 33.2671921,26.2697773 33.1443549,26.4788971 C33.064872,26.6159067 32.9203577,26.695228 32.7686177,26.695228 Z" id="Path"></path> <path d="M26.4750199,33.0481442 C26.3232799,33.0481442 26.1787656,32.9688229 26.0992827,32.8318134 L24.2494997,29.6301166 C24.1266625,29.4209968 24.1989197,29.1613998 24.4084654,29.0388123 C24.6180112,28.9162248 24.8781369,28.9883351 25.0009741,29.1974549 L26.8507571,32.3991516 C26.9735943,32.6082715 26.9013371,32.8678685 26.6917914,32.990456 C26.6195342,33.0337222 26.5472771,33.0481442 26.4750199,33.0481442 Z" id="Path"></path> <path d="M17.8330647,35.4133616 C17.5946161,35.4133616 17.3995218,35.2186638 17.3995218,34.9806999 L17.3995218,31.2814422 C17.3995218,31.0434783 17.5946161,30.8487805 17.8330647,30.8487805 C18.0715133,30.8487805 18.2666076,31.0434783 18.2666076,31.2814422 L18.2666076,34.9806999 C18.2666076,35.2186638 18.0715133,35.4133616 17.8330647,35.4133616 Z" id="Path"></path> <path d="M9.16220668,33.1490986 C9.08994953,33.1490986 9.01046666,33.1274655 8.94543523,33.0914104 C8.73588949,32.9688229 8.66363234,32.7092259 8.78646949,32.500106 L10.6362525,29.2984093 C10.7590897,29.0892895 11.0192154,29.0171792 11.2287612,29.1397667 C11.4383069,29.2623542 11.5105641,29.5219512 11.3877269,29.731071 L9.53794386,32.9327678 C9.45846099,33.0697773 9.31394669,33.1490986 9.16220668,33.1490986 Z" id="Path"></path> <path d="M2.79635172,26.8610817 C2.64461171,26.8610817 2.50009741,26.7817603 2.42061454,26.6447508 C2.29777738,26.435631 2.37003453,26.1760339 2.57958027,26.0534464 L5.78779775,24.2074231 C5.99734349,24.0848356 6.25746923,24.1569459 6.38030638,24.3660657 C6.50314354,24.5751856 6.43088639,24.8347826 6.22134065,24.9573701 L3.01312317,26.8033934 C2.94086602,26.8394486 2.86860887,26.8610817 2.79635172,26.8610817 Z" id="Path"></path> <path d="M4.13310901,18.2294804 L0.433542903,18.2294804 C0.195094306,18.2294804 0,18.0347826 0,17.7968187 C0,17.5588547 0.195094306,17.3641569 0.433542903,17.3641569 L4.14033472,17.3641569 C4.37878332,17.3641569 4.57387762,17.5588547 4.57387762,17.7968187 C4.56665191,18.0419936 4.3715576,18.2294804 4.13310901,18.2294804 Z" id="Path"></path> <path d="M5.91063491,11.4366914 C5.83837776,11.4366914 5.75889489,11.4150583 5.69386346,11.3790032 L2.48564598,9.52576882 C2.27610024,9.40318134 2.2110688,9.14358431 2.32668024,8.93446448 C2.44229169,8.72534464 2.70964314,8.65323436 2.91918888,8.77582185 L6.12740636,10.6290562 C6.33695209,10.7516437 6.40198353,11.0112407 6.28637209,11.2203606 C6.20688922,11.3573701 6.06237492,11.4366914 5.91063491,11.4366914 Z" id="Path"></path> <path d="M10.853024,6.43223754 C10.701284,6.43223754 10.5567697,6.35291622 10.4772868,6.21590668 L8.62750376,3.01420997 C8.50466661,2.80509014 8.57692376,2.54549311 8.78646949,2.42290562 C8.99601523,2.30031813 9.25614097,2.37242842 9.37897813,2.58154825 L11.2287612,5.78324496 C11.3515983,5.99236479 11.2793412,6.25196182 11.0697954,6.37454931 C11.004764,6.41781548 10.9252811,6.43223754 10.853024,6.43223754 Z" id="Path"></path> </g> </g> </g> </g> </svg>',
+      4: '<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> <title>4e - rond</title> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="iconen-copy" transform="translate(-187, 0)" fill-rule="nonzero"> <g id="4e---rond" transform="translate(187, 0)"> <circle id="Root-Copy-3" fill="#429153" cx="24" cy="24" r="24"></circle> <path d="M11.9740572,27.9899194 L21.8272592,37.2326907 C22.4342061,37.8043423 23.2154888,38.0869565 23.9967716,38.0869565 C24.7780543,38.0869565 25.559337,37.8043423 26.1662839,37.2326907 L36.0259428,27.9899194 C36.0323997,27.9834963 36.0323997,27.9834963 36.0388566,27.9770733 C37.6918184,26.3327721 38.6086957,24.1296654 38.6086957,21.7852515 C38.6086957,19.4408377 37.6982753,17.237731 36.0388566,15.5934298 C34.4117223,13.9748207 32.184098,13.1912084 29.7692241,13.3839 C27.6901081,13.5508993 25.617449,14.4501266 24.0032284,15.876044 C21.9241124,13.9940899 19.9676772,13.0434783 18.1855777,13.0434783 C15.8288158,13.0434783 13.6141052,13.9491285 11.9611434,15.5998528 C10.3017247,17.2505771 9.39130435,19.4472607 9.39130435,21.7916746 C9.39130435,24.1360884 10.3017247,26.3391951 11.9611434,27.9834963 C11.9676003,27.9834963 11.9740572,27.9899194 11.9740572,27.9899194 Z M12.7876243,16.4155804 C14.2210521,14.9896629 16.145203,14.1996276 18.1920346,14.1996276 C19.7546,14.1996276 21.6270958,15.1952006 23.6029018,17.0835777 C23.8288926,17.3019615 24.190478,17.2955384 24.4164689,17.0771547 C25.8950949,15.625545 27.8838146,14.7006256 29.8725342,14.5400493 C31.9451934,14.3730499 33.8435167,15.0410473 35.2317463,16.4155804 C36.6651742,17.8414978 37.4593706,19.7555672 37.4593706,21.7916746 C37.4593706,23.8277819 36.671631,25.7354283 35.2382032,27.1613457 L25.3785443,36.3976939 C24.6101754,37.1170757 23.4027384,37.1170757 22.6343694,36.3976939 L12.7811674,27.1549227 C11.3477396,25.7290052 10.5599609,23.8213589 10.5599609,21.7852515 C10.5535431,19.7555672 11.3477396,17.8414978 12.7876243,16.4155804 Z" id="Shape-Copy" stroke="#FFFFFF" fill="#FFFFFF"></path> </g> </g> </g> </svg>',
+      5: '<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> <title>5e - rond</title> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="iconen-copy" transform="translate(-250, 0)" fill-rule="nonzero"> <g id="5e---rond" transform="translate(250, 0)"> <circle id="Root-Copy-2" fill="#2E6AAC" cx="24" cy="24" r="24"></circle> <path d="M24,16.5933305 L36.8676587,38.6521739 L11.1323413,38.6521739 L24,16.5933305 Z" id="6e-copy-2" stroke="#FFFFFF" stroke-width="2" transform="translate(24, 27.1304) rotate(-180) translate(-24, -27.1304)"></path> </g> </g> </g> </svg>',
+      6: '<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> <title>6e - rond</title> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="iconen-copy" transform="translate(-313, 0)" fill-rule="nonzero"> <g id="6e---rond" transform="translate(313, 0)"> <circle id="Root-Copy" fill="#384087" cx="24" cy="24" r="24"></circle> <circle id="7e-copy" stroke="#FFFFFF" stroke-width="2" cx="24" cy="24" r="18.7826087"></circle> <circle id="7e-copy-2" stroke="#FFFFFF" stroke-width="2" cx="24" cy="24" r="7.30434783"></circle> </g> </g> </g> </svg>',
+      7: '<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"> <title>7e - rond</title> <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"> <g id="iconen-copy" transform="translate(-375, 0)" fill-rule="nonzero"> <g id="7e---rond" transform="translate(375, 0)"> <circle id="Root" fill="#600B4C" cx="24" cy="24" r="24"></circle> <circle id="7e-copy-3" stroke="#FFFFFF" stroke-width="2" cx="24" cy="24" r="18.7826087"></circle> </g> </g> </g> </svg>',
+    };
+
+    const weekdays = [
+      { name: 'Tuesday', chakraN: 1, chakra: 'Root', color: '#BD151B' },
+      { name: 'Monday', chakraN: 2, chakra: 'Sacral', color: '#F35822' },
+      { name: 'Sunday', chakraN: 3, chakra: 'Solar Plexus', color: '#F3B512' },
+      { name: 'Friday', chakraN: 4, chakra: 'Heart', color: '#429153' },
+      { name: 'Wednesday', chakraN: 5, chakra: 'Throat', color: '#2E6AAC' },
+      { name: 'Thursday', chakraN: 6, chakra: 'Third Eye', color: '#384087' },
+      { name: 'Saturday', chakraN: 7, chakra: 'Crown', color: '#600B4C' },
+    ];
+
+    const planetary = {
+      'Sun': { ess: 'Life force · Leadership · Self-expression', asp: 'Transformation | Manifestation | Authenticity', ins: 'Action - Creation - Power', bP: ['Good circulation', 'Strong immune', 'Vital energy'], bM: ['Confidence', 'Clarity', 'Authentic'], iP: ['Cannot relax', 'Low energy', 'Too much energy'], iM: ['Ego issues', 'Self-doubt', 'Boundaries'] },
+      'Moon': { ess: 'Creativity · Passion · Emotions', asp: 'Femininity | Sensuality | Flow', ins: 'Feeling - Connection - Flexibility', bP: ['Healthy hormones', 'PMS relief', 'Bladder ok'], bM: ['Unblocked creativity', 'Letting go', 'Abundance'], iP: ['Lower body pain', 'PMS', 'Blocked flow'], iM: ['Blocked creativity', 'Fear', 'Resistance'] },
+      'Mars': { ess: 'Strength · Vitality · Courage', asp: 'Stability | Structure | Foundation', ins: 'Action - Discipline - Basis', bP: ['Hip healthy', 'Good legs', 'Circulation ok'], bM: ['Courage', 'Clarity', 'Grounded'], iP: ['Hip pain', 'Poor legs', 'Poor circulation'], iM: ['Fear', 'Uncertainty', 'Ungrounded'] },
+      'Mercury': { ess: 'Communication · Creativity · Expression', asp: 'Intellect | Speech | Clarity', ins: 'Clarity - Truth - Expression', bP: ['Jaw healthy', 'Hearing clear', 'Throat ok'], bM: ['Formulate', 'Expressing', 'Clear'], iP: ['Jaw problems', 'Hearing loss', 'Throat'], iM: ['Difficulty', 'Anxiety', 'Blocked'] },
+      'Jupiter': { ess: 'Spiritual · Cosmic · Consciousness', asp: 'Pure energy | Illumination | Unity', ins: 'Expansion - Wisdom - Knowledge', bP: ['Migraine gone', 'Sleep ok', 'Awake'], bM: ['Clarity', 'Arrogance gone', 'Clear'], iP: ['Migraine', 'Sleep problems', 'Drowsy'], iM: ['Confusion', 'Arrogance', 'Chaos'] },
+      'Venus': { ess: 'Harmony · Love · Openness', asp: 'Relationships | Beauty | Fulfillment', ins: 'Freedom - Space - Love', bP: ['Heart healthy', 'Circulation', 'Energy'], bM: ['Trust', 'Forgive', 'Grateful'], iP: ['Heart problems', 'Poor circulation', 'Low energy'], iM: ['Distrust', 'Cannot forgive', 'Ungrateful'] },
+      'Saturn': { ess: 'Consciousness · Wisdom · Intuition', asp: 'Visualization | Awareness | Perception', ins: 'Insight - Discipline - Growth', bP: ['Pineal active', 'Sleep ok', 'Eyes clear'], bM: ['Formulate', 'Ease', 'Confident'], iP: ['Pineal issues', 'Sleep problems', 'Eye problems'], iM: ['Difficulty', 'Anxiety', 'Blocked'] },
+    };
+
+    const celestial = ['Mars', 'Moon', 'Sun', 'Venus', 'Mercury', 'Jupiter', 'Saturn'];
+    // weekdays index: 0=Tuesday(Mars), 1=Monday(Moon), 2=Sunday(Sun), 3=Friday(Venus), 4=Wednesday(Mercury), 5=Thursday(Jupiter), 6=Saturday(Saturn)
+    const days = [
+      { ...weekdays[6], date: 'Saturday – 17 mei', dayOfX: 'Day of Saturn' },
+      { ...weekdays[2], date: 'Sunday – 18 mei', dayOfX: 'Day of the Sun' },
+      { ...weekdays[1], date: 'Monday – 19 mei', dayOfX: 'Day of the Moon' },
+      { ...weekdays[0], date: 'Tuesday – 20 mei', dayOfX: 'Day of Mars' },
+      { ...weekdays[4], date: 'Wednesday – 21 mei', dayOfX: 'Day of Mercury' },
+      { ...weekdays[5], date: 'Thursday – 22 mei', dayOfX: 'Day of Jupiter' },
+      { ...weekdays[3], date: 'Friday – 23 mei', dayOfX: 'Day of Venus' },
+    ];
+
+    let idx = new Date().getDay(); // 0=Sunday, 1=Monday, etc
+    // Adjust because our days array starts with Saturday(6), Sunday(2), Monday(1)...
+    // Map: 0=Sunday→1, 1=Monday→2, 2=Tuesday→3, 3=Wednesday→4, 4=Thursday→5, 5=Friday→6, 6=Saturday→0
+    const dayMap = [1, 2, 3, 4, 5, 6, 0];
+    idx = dayMap[idx];
+    let flipped = false;
+
+    function darkenColor(hex, factor = 0.7) {
+      const num = parseInt(hex.replace('#', ''), 16);
+      const r = Math.floor((num >> 16) * factor);
+      const g = Math.floor(((num >> 8) & 0xFF) * factor);
+      const b = Math.floor((num & 0xFF) * factor);
+      return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+    }
+
+    function render() {
+      const d = days[idx];
+      const body = celestial[d.chakraN - 1];
+      const p = planetary[body];
+      const card = document.getElementById('card');
+      const wrapper = document.getElementById('cardWrapper');
+
+      // Set CSS variable for day color
+      document.documentElement.style.setProperty('--day-color', d.color);
+
+      document.getElementById('cardIcon').innerHTML = svgs[d.chakraN];
+      document.getElementById('cardIcon').style.color = d.color;
+
+      if (!flipped) {
+        wrapper.classList.remove('back');
+        wrapper.classList.add('front');
+        card.style.background = d.color;
+        card.classList.remove('flipped');
+        document.getElementById('frontText').innerHTML = `<span class="title-line">${d.date}</span><br>Day of ${body}<br><br><span class="chakra-line">${d.chakraN}e Chakra – ${d.chakra}</span>`;
+      } else {
+        wrapper.classList.remove('front');
+        wrapper.classList.add('back');
+        card.style.background = darkenColor(d.color);
+        card.classList.add('flipped');
+        let html = `<div class="back-header"><div class="back-title">${d.name}</div><div class="back-subtitle">${body} · ${d.chakra}</div></div>`;
+        html += `<div class="essence"><strong>Essence</strong><br>${p.ess}</div>`;
+        html += `<div class="aspects"><strong>Aspects</strong><br>${p.asp}</div>`;
+        html += `<div class="insights"><strong>Insights</strong><br>${p.ins}</div>`;
+        html += `<div class="balance-section"><div class="section-col"><div class="section-title">BALANCE</div><div class="section-label">Physical</div>`;
+        p.bP.forEach(item => { html += `<div class="section-item">• ${item}</div>`; });
+        html += `<div class="section-label">Mental</div>`;
+        p.bM.forEach(item => { html += `<div class="section-item">• ${item}</div>`; });
+        html += `</div><div class="divider"></div><div class="section-col"><div class="section-title">IMBALANCE</div><div class="section-label">Physical</div>`;
+        p.iP.forEach(item => { html += `<div class="section-item">• ${item}</div>`; });
+        html += `<div class="section-label">Mental</div>`;
+        p.iM.forEach(item => { html += `<div class="section-item">• ${item}</div>`; });
+        html += `</div></div>`;
+        document.getElementById('backContent').innerHTML = html;
+      }
+    }
+
+    document.getElementById('cardWrapper').addEventListener('click', function() {
+      flipped = !flipped;
+      render();
+    });
+
+    const btnContainer = document.getElementById('dayButtons');
+    days.forEach((d, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'day-btn' + (i === idx ? ' active' : '');
+      btn.textContent = d.name.slice(0, 3);
+      btn.style.setProperty('--day-color', d.color);
+      btn.onclick = function() {
+        document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        idx = i;
+        flipped = false;
+        render();
+      };
+      btnContainer.appendChild(btn);
+    });
+
+    render();
+  </script>
+</body>
+</html>
