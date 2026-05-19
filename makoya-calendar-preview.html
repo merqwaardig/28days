@@ -228,9 +228,10 @@
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
-      gap: 1px;
+      gap: 0;
       background: #ffffff;
-      padding: 1px;
+      padding: 0;
+      border: 1px solid #ffffff;
     }
 
     .calendar-day {
@@ -246,6 +247,7 @@
       font-weight: 500;
       position: relative;
       padding: 4px;
+      box-sizing: border-box;
     }
 
     .calendar-day.empty {
@@ -554,6 +556,15 @@
         }
 
         grid.appendChild(dayCell);
+      }
+
+      // Add empty cells after last day of month to complete the grid
+      const totalCells = firstDay + daysInMonth;
+      const remainingCells = (7 - (totalCells % 7)) % 7;
+      for (let i = 0; i < remainingCells; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'calendar-day empty';
+        grid.appendChild(emptyCell);
       }
     }
 
