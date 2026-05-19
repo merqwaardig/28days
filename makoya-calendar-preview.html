@@ -261,15 +261,6 @@
       z-index: 2;
     }
 
-    .chakra-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      position: absolute;
-      bottom: 3px;
-      right: 3px;
-      box-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
-    }
 
     @media (max-width: 768px) {
       .month-calendar {
@@ -529,24 +520,15 @@
           // Today: full chakra color background
           dayCell.style.backgroundColor = chakraColor;
         } else {
-          // Other days: dark background with chakra dot
+          // Other days: dark background with chakra color bottom line
           dayCell.style.backgroundColor = '#100D25';
+          dayCell.style.borderBottom = `2px solid ${chakraColor}`;
         }
 
         // Create day number
         const dayNumber = document.createElement('span');
         dayNumber.className = 'day-number';
         dayNumber.textContent = day;
-
-        dayCell.appendChild(dayNumber);
-
-        // Add chakra dot for non-today days
-        if (!isToday) {
-          const dot = document.createElement('div');
-          dot.className = 'chakra-dot';
-          dot.style.backgroundColor = chakraColor;
-          dayCell.appendChild(dot);
-        }
 
         grid.appendChild(dayCell);
       }
