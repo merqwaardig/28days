@@ -7,16 +7,19 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html {
-      height: 100%;
+      height: 100vh;
       width: 100%;
+      overflow: hidden;
       background: linear-gradient(135deg, rgba(10, 14, 39, 0.7) 0%, rgba(26, 26, 63, 0.7) 50%, rgba(13, 10, 32, 0.7) 100%), url('assets/bg.jpg') center/cover;
       background-attachment: fixed;
       background-repeat: no-repeat;
+      background-size: cover;
     }
     body {
       font-family: 'Courier New', monospace;
       padding: 20px;
-      min-height: 100vh;
+      height: 100vh;
+      overflow-y: auto;
       position: relative;
       background: transparent;
     }
