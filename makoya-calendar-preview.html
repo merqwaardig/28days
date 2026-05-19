@@ -497,6 +497,7 @@
       const now = new Date();
       const year = now.getFullYear();
       const month = now.getMonth();
+      const today = now.getDate();
       const monthName = now.toLocaleString('default', { month: 'long', year: 'numeric' });
 
       // Get first day of month and number of days
@@ -526,8 +527,16 @@
         const dayOfWeek = (firstDay + day - 1) % 7;
         const chakraColor = chakraColorMap[dayOfWeek];
 
-        // Set background to chakra color
-        dayCell.style.backgroundColor = chakraColor;
+        // Check if this is today
+        const isToday = day === today;
+
+        if (isToday) {
+          // Today: full chakra color background
+          dayCell.style.backgroundColor = chakraColor;
+        } else {
+          // Other days: gray background with chakra dot
+          dayCell.style.backgroundColor = '#c0c0c7c';
+        }
 
         // Create day number
         const dayNumber = document.createElement('span');
@@ -535,6 +544,15 @@
         dayNumber.textContent = day;
 
         dayCell.appendChild(dayNumber);
+
+        // Add chakra dot for non-today days
+        if (!isToday) {
+          const dot = document.createElement('div');
+          dot.className = 'chakra-dot';
+          dot.style.backgroundColor = chakraColor;
+          dayCell.appendChild(dot);
+        }
+
         grid.appendChild(dayCell);
       }
     }
